@@ -2,6 +2,7 @@ import collections
 import json
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
+from nltk.util import ngrams
 
 
 def read_file(filename):
@@ -31,17 +32,17 @@ def process_question(qas):
     return qas[0]["question"], qas[0]['id'], qas[0]['answers'], qas[0]["is_impossible"]
 
 def get_context_word_dist(context):
-    tokens = word_tokenize(context)
+    #Removes stopwords in preprocessing (3rd argument)
+    one_grams = extract_ngrams(context, 1, True)
+    #Does not remove stopwords
+    two_grams = extract_ngrams(context, 2, False)
 
-    stop_words = set(stopwords.words('english'))
-    tokens = [w for w in tokens if ((not w in stop_words) and (w.isalpha()))]
+    #Change n_gram setting
+    tokens = two_grams
 
     wlist = []
 
-    #Default to entire context length
-    context_depth = len(tokens)
-
-    for i in range(context_depth):
+    for i in len(tokens):
         if tokens[i] not in wlist:
             wlist.append(tokens[i])
 
@@ -51,6 +52,19 @@ def get_context_word_dist(context):
     max_token = dist_sorted[0][0]
     # print(max_token)
     return max_token, dist_sorted
+
+def extract_ngrams(data, num, remove_stopwords):
+    tokens = word_tokenize(data)
+
+    #Remove punctuation
+    tokens = [w for w in tokens if w.isalpha()]
+
+    if remove_stopwords:
+        stop_words = set(stopwords.words('english'))
+        tokens = [w for w in tokens if (w not in stop_words)]
+
+    n_grams = ngrams(tokens, num)
+    return [' '.join(grams) for grams in n_grams]
 
 if __name__ == '__main__':
     questions, answers = simple_baseline("../data/train-v2.0.json")
