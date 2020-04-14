@@ -1,5 +1,6 @@
 import collections
 import json
+import nltk
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 from nltk.util import ngrams
@@ -16,20 +17,22 @@ def simple_baseline(filename):
 
     output_questions = []
     output_answers = []
+    json_out = {}
 
     if datastore is not None:
         for article in datastore["data"]:
             for paragraph in article["paragraphs"]:
-                qas = paragraph["qas"]
-                question, id, answers, is_impossible = process_question(qas)
-                context = paragraph["context"]
-                most_freq_word, context_dist = get_context_word_dist(context)
-                output_questions.append(question)
-                output_answers.append(most_freq_word)
-    return output_questions, output_answers
+                for qa in paragraph["qas"]:
+                    question, id, answers, is_impossible = process_question(qa)
+                    context = paragraph["context"]
+                    most_freq_word, context_dist = get_context_word_dist(context)
+                    output_questions.append(question)
+                    output_answers.append(most_freq_word)
+                    json_out[id] = most_freq_word
+    return output_questions, output_answers, json_out
 
-def process_question(qas):
-    return qas[0]["question"], qas[0]['id'], qas[0]['answers'], qas[0]["is_impossible"]
+def process_question(qa):
+    return qa["question"], qa['id'], qa['answers'], qa["is_impossible"]
 
 def get_context_word_dist(context):
     #Removes stopwords in preprocessing (3rd argument)
@@ -38,13 +41,12 @@ def get_context_word_dist(context):
     two_grams = extract_ngrams(context, 2, False)
 
     #Change n_gram setting
-    tokens = two_grams
+    tokens = two_grams #+ one_grams
 
-    wlist = []
+    wlist = set()
 
-    for i in len(tokens):
-        if tokens[i] not in wlist:
-            wlist.append(tokens[i])
+    for i in range(len(tokens)):
+        wlist.add(tokens[i])
 
     wordfreq = [tokens.count(w) for w in wlist]
     dist = zip(wlist, wordfreq)
@@ -67,6 +69,15 @@ def extract_ngrams(data, num, remove_stopwords):
     return [' '.join(grams) for grams in n_grams]
 
 if __name__ == '__main__':
-    questions, answers = simple_baseline("../data/train-v2.0.json")
-    for q, a in zip(questions, answers):
-        print(str(q)+"\n", a)
+    nltk.download('punkt')
+    nltk.download('stopwords')
+
+    questions, answers, json_out = simple_baseline("../data/train-v2.0.json")
+    output_file = input('Where would you like to store the JSON output? ')
+
+    with open(output_file, 'w') as f:
+        json.dump(json_out, f)
+
+
+    # for q, a in zip(questions, answers):
+    #     print(str(q)+"\n", a)
