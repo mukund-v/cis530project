@@ -13,7 +13,7 @@ We can run the evaluation script on a given data and prediction file using the f
 command line command:
 
 ```
-python PATH/TO/score.py data_file prediction_file
+python PATH/TO/score.py PATH/TO/data_file PATH/prediction_file
 ```
 
 # Input data file
