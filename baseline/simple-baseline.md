@@ -3,6 +3,11 @@
 Our simple baseline simply outputs the most common one or two gram from the given
 context paragraph as the answer to the question regardless of the given question.
 
+Note that our model removes stopwords in the case of one-grams but not two-grams
+as stopwords may be a part of a two-gram entity (whereas stopwords are very rarely
+answers themselves in the case of one-grams).
+
+# Runnin the baseline model
 We can run the baseline using the following command:
 
 ```

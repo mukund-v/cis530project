@@ -46,7 +46,9 @@ the prediction file is a JSON file containing mappings from question id in the d
 ```
 
 # Metrics
-The evaluation statistics are broken into two sets of scores and then combined using a weighted average: one for questions that are answerable with a certain probability (HasAns below), and questions that are not answerable with a certain probability (NoAns below). For each of these sets two scores are given: one for the percent of questions that were answered exactly correct (after some normalization like casing and removing whitespace) ({}_exact below), and another that is an f1 score based on common tokens between answers ({}_f1 below). 
+Evaluation on this task is simply based on accuracy and F1 score on the testing dataset.
+
+The evaluation statistics are broken into two sets of scores and then combined using a weighted average: one for questions that are answerable with a certain probability (HasAns below), and questions that are not answerable with a certain probability (NoAns below). For each of these sets two scores are given: one for the percent of questions that were answered exactly correct (after some normalization like casing and removing whitespace) ({}_exact below), and another that is an f1 score based on common tokens between answers ({}_f1 below).
 
 These two sets are combined with a weighted average based on the number of answerable (HasAns_total below) and unanswerable questions (NoAns_total below) as a fraction of the total questions (total below). This provides an exact score and f1 score for the entire dataset ("exact", "f1" below).
 
