@@ -7,7 +7,7 @@ Note that our model removes stopwords in the case of one-grams but not two-grams
 as stopwords may be a part of a two-gram entity (whereas stopwords are very rarely
 answers themselves in the case of one-grams).
 
-# Runnin the baseline model
+# Running the baseline model
 We can run the baseline using the following command:
 
 ```
