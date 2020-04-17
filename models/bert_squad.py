@@ -33,4 +33,4 @@ class BERT_SQUAD(nn.Module):
         fc_output = self.fc_layers(bert_encoded)
         start_outputs, end_outputs = fc_output[:, :, 0].squeeze(-1), fc_output[:, :, 1].squeeze(-1)
 
-        start_probs =
+        return start_outputs, end_outputs
