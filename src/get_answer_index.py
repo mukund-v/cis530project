@@ -1,8 +1,7 @@
 def find_answer(context, answer):
     ind = -1
-    try: 
-        context.find(answer)
+    try:
+        ind = context.find(answer)
     except as e:
-        print ("Error", e)
-    return ind
-    
+        return -1, -1
+    return ind, ind + len(answer)
