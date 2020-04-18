@@ -13,4 +13,5 @@ if __name__=="__main__":
     with open("../data/{}.json".format(args.file), 'r') as input:
         data = json.load(input)['data']
 
-    contexts_questions = [qa['context'], qa['question'] for prgrph in data for qa in prgrph['paragraphs']]
+
+    contexts_questions = [[qa['context'], qs['question']] for prgrph in data for qa in prgrph['paragraphs'] for qs in qa['qas']]
