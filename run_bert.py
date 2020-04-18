@@ -54,3 +54,6 @@ for epoch in range(num_epochs):
                 print('Predicted answer: {} \n'.format(answers[i]))
 
             print('-----------------------------------------------------')
+
+
+torch.save(bs.state_dict(), 'bert_squad.pt')
