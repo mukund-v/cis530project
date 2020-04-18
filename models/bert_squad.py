@@ -57,13 +57,15 @@ class BERT_SQUAD(nn.Module):
         fc_output = self.fc_layers(bert_encoded)
         start_outputs, end_outputs = fc_output[:, :, 0].squeeze(-1), fc_output[:, :, 1].squeeze(-1)
 
-        starts, ind = start_outputs.max(1)
-        ends, ind = end_outputs.max(1)
+        starts, s_ind = start_outputs.max(1)
+        ends, e_ind = end_outputs.max(1)
 
 
         answers = []
         for i in range(start_outputs.shape[0]):
-            answer = self.tokenizer.convert_ids_to_tokens(encoded['input_ids'][i])[starts[i]:ends[i]] if starts[i] <= ends[i] else None
+            start = s_ind[i].item()
+            end = e_ind[i].item()
+            answer = self.tokenizer.convert_ids_to_tokens(encoded['input_ids'][i])[start:end] if start <= end else None
             answers.append(answer)
 
         return answers
