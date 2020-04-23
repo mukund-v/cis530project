@@ -25,6 +25,7 @@ I'll also try uploading to gradescope in this submission, but the file is ~ half
 
 # Running the baseline model
 You can run our model using the 'bert_predictions.py' script. Please pip install torch and transformers libraries.
+Our pytorch model is defined in the file 'bert_squad.py'
 
 Note that the script requires:
 - model parameters at the path './bert-squad.pt'
