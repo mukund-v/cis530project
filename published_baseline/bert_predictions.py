@@ -15,13 +15,12 @@ examples = feature_processor.get_dev_examples('../data')
 
 tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
 
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
 bs1 = bs1.to(device)
 bs1.eval()
 
 outputs = dict()
-
-
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
 for i in range(len(examples)):
