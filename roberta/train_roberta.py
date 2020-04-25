@@ -45,7 +45,7 @@ for epoch in range(num_epochs):
 
     optimizer.zero_grad()
     loss = rs(c_q_pairs, attention_mask, token_type_ids, start_ind, end_ind)
-    logger.add_scalar('loss', epoch * len(train_loader) + i, loss.item())
+    logger.add_scalar('loss', loss.item(), epoch * len(train_loader) + i)
     print('loss on batch {} : {}'.format(epoch * len(train_loader) + i, loss.item()))
     loss.backward()
     optimizer.step()
