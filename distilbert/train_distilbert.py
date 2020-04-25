@@ -29,6 +29,7 @@ features, dataset = squad_convert_examples_to_features(
 )
 
 train_loader = DataLoader(dataset=dataset, batch_size=6, shuffle=True)
+dev_loader = DataLoader(dataset=dataset, batch_size=1, shuffle=True)
 dbs = DISTILBERT_SQUAD().to(device)
 num_epochs = 2
 optimizer = torch.optim.Adam(dbs.parameters(), lr=.00003)
