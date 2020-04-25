@@ -6,7 +6,7 @@ from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 from transformers import squad_convert_examples_to_features
 from transformers.data.processors.squad import SquadResult, SquadV2Processor
-from transformers import RobertatModel, RobertaConfig, RobertaTokenizer
+from transformers import RobertaModel, RobertaConfig, RobertaTokenizer
 
 
 
