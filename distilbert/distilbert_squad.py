@@ -23,7 +23,6 @@ class DISTILBERT_SQUAD(nn.Module):
 
         bert_encoded = self.distilbert_model(
             input_ids=c_q_pairs,
-            token_type_ids=token_type_ids,
             attention_mask=attention_mask
         )[0]
 
@@ -42,7 +41,6 @@ class DISTILBERT_SQUAD(nn.Module):
     def predict(self, c_q_pairs, attention_mask, token_type_ids):
         bert_encoded = self.distilbert_model(
             input_ids=c_q_pairs,
-            token_type_ids=token_type_ids,
             attention_mask=attention_mask
         )[0]
 
