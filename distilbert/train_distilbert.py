@@ -97,7 +97,6 @@ for i in range(len(examples)):
                                max_length=512,
                                return_tensors='pt')
   c_q_pairs = tokenized['input_ids'].to(device)
-  token_type_ids = tokenized['token_type_ids'].to(device)
   attention_mask = tokenized['attention_mask'].to(device)
 
   indices = dbs.predict(c_q_pairs, attention_mask, token_type_ids)

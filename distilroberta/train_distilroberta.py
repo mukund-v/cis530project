@@ -97,13 +97,12 @@ for i in range(len(examples)):
                                max_length=512,
                                return_tensors='pt')
   c_q_pairs = tokenized['input_ids'].to(device)
-  token_type_ids = tokenized['token_type_ids'].to(device)
   attention_mask = tokenized['attention_mask'].to(device)
 
   indices = rs.predict(c_q_pairs, attention_mask, token_type_ids)
   start, end = indices[0][0], indices[0][1]
   answer = tokenizer.convert_tokens_to_string(tokenizer.convert_ids_to_tokens(c_q_pairs.view(-1).tolist())[start:end+1]) if start <= end else ""
-  if '[CLS]' in answer:
+  if '<s>' in answer:
     answer = ""
   outputs[q_id] = answer
 
