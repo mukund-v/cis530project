@@ -13,7 +13,7 @@ from transformers import BertModel, BertConfig, BertTokenizer
 device = torch.device('cuda')
 logger = SummaryWriter('logs/bert_model')
 
-tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased')
+tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
 feature_processor = SquadV2Processor()
 examples = feature_processor.get_train_examples('../data')
 
