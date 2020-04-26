@@ -5,7 +5,7 @@ from transformers import RobertaModel, RobertaConfig, RobertaTokenizer
 
 class DISTILROBERTA_SQUAD(nn.Module):
     def __init__(self):
-        super(ROBERTA_SQUAD, self).__init__()
+        super(DISTILROBERTA_SQUAD, self).__init__()
 
         self.roberta_model = RobertaModel.from_pretrained('distilroberta-base')
 
