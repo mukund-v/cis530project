@@ -81,6 +81,8 @@ def compute_f1(a_gold, a_pred):
 def get_raw_scores(dataset, preds):
   exact_scores = {}
   f1_scores = {}
+  cnt = 0
+  blank = 0
   for article in dataset:
     for p in article['paragraphs']:
       for qa in p['qas']:
@@ -96,7 +98,15 @@ def get_raw_scores(dataset, preds):
         a_pred = preds[qid]
         # Take max over all gold answers
         exact_scores[qid] = max(compute_exact(a, a_pred) for a in gold_answers)
+      
+        if exact_scores[qid]==0:
+          if a_pred!='' and a_pred!=' ':
+            print (qa['question'], "gold: {}".format(gold_answers[0]), "pred: {}".format(a_pred))
+          cnt += 1
+          if a_pred=='' or a_pred==' ' or gold_answers[0]=='':
+            blank+=1
         f1_scores[qid] = max(compute_f1(a, a_pred) for a in gold_answers)
+  print (blank / cnt)
   return exact_scores, f1_scores
 
 def apply_no_ans_threshold(scores, na_probs, qid_to_has_ans, na_prob_thresh):
