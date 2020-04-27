@@ -81,33 +81,3 @@ for epoch in range(num_epochs):
 
 
 torch.save(rs.state_dict(), './distilroberta-squad.pt')
-
-examples = feature_processor.get_dev_examples('../data')
-
-rs.eval()
-
-outputs = dict()
-
-for i in range(len(examples)):
-  q_id = examples[i].qas_id
-  context = examples[i].context_text
-  question = examples[i].question_text
-  tokenized = tokenizer.encode_plus(question,
-                               context,
-                               max_length=512,
-                               return_tensors='pt')
-  c_q_pairs = tokenized['input_ids'].to(device)
-  attention_mask = tokenized['attention_mask'].to(device)
-
-  indices = rs.predict(c_q_pairs, attention_mask, token_type_ids)
-  start, end = indices[0][0], indices[0][1]
-  answer = tokenizer.convert_tokens_to_string(tokenizer.convert_ids_to_tokens(c_q_pairs.view(-1).tolist())[start:end+1]) if start <= end else ""
-  if '<s>' in answer:
-    answer = ""
-  outputs[q_id] = answer
-
-  if i % 100 == 0:
-    print('done with example : {}'.format(i))
-
-with open('distilroberta1-dev-preds.json', 'w') as f:
-  json.dump(outputs, f)
