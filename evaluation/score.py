@@ -89,6 +89,12 @@ def get_raw_scores(dataset, preds):
   question_types = ['who', 'what', 'where', 'when', 'why', 'how', 'which']
   question_type = collections.Counter()
   wrong_type = collections.Counter()
+  question_length = 0 # for calculating average question length
+  wrong_length = 0   # for calculating average question length for ones we got wrong
+  pred_length = 0
+  pred_wrong_length = 0
+  gold_length = 0
+  gold_wrong_length = 0
   for article in dataset:
     for p in article['paragraphs']:
       for qa in p['qas']:
@@ -103,21 +109,25 @@ def get_raw_scores(dataset, preds):
           continue
 
         q_low = qa['question'].lower().replace("?","")
-        for q_type in question_types:
+        for q_type in question_types: # adds 1 to the question type count 
           if q_type in q_low:
             question_type[q_type]+=1
         a_pred = preds[qid]
         # Take max over all gold answers
         exact_scores[qid] = max(compute_exact(a, a_pred) for a in gold_answers)
-
+        question_length+=len(qa['question'])  # adds to length of all questions
+        pred_length += len(a_pred)
+        gold_length += sum(len(a) for a in gold_answers) / len(gold_answers)
         # New eval code
         if exact_scores[qid]==0:
           for q_type in question_types:
             if q_type in q_low:
               wrong_type[q_type] += 1
           cnt += 1
+          wrong_length+=len(qa['question'])
+          pred_wrong_length += len(a_pred)
             # print("&&& ", qa['question'], "gold: {}".format(gold_answers[0]), "pred: {}".format(a_pred))
-
+          gold_wrong_length += sum(len(a) for a in gold_answers) / len(gold_answers)
           #Errors due to blanks
           if a_pred=='' or a_pred==' ':
             pred_blank += 1
@@ -153,6 +163,12 @@ def get_raw_scores(dataset, preds):
     question_type[key] /= 11873 # this is total number of qs. a couple contain two types
   err_stats["Wrong by question type"] = wrong_type
   err_stats["Questions by type"] = question_type
+  err_stats["Avg question length"] = question_length / 11873
+  err_stats["Avg wrong question length"] = wrong_length / cnt
+  err_stats["Avg pred answer length"] = pred_length / 11873
+  err_stats["Avg wrong pred answer length"] = pred_wrong_length / cnt
+  err_stats["Avg gold answer length"] = gold_length / 11873
+  err_stats["Avg wrong gold answer length"] = gold_wrong_length / cnt
 
   return exact_scores, f1_scores, err_stats
 
