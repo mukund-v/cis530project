@@ -82,7 +82,11 @@ def get_raw_scores(dataset, preds):
   exact_scores = {}
   f1_scores = {}
   cnt = 0
-  blank = 0
+  pred_blank = 0
+  gold_blank = 0
+  pred_is_substring = 0
+  gold_is_substring = 0
+
   for article in dataset:
     for p in article['paragraphs']:
       for qa in p['qas']:
@@ -98,16 +102,43 @@ def get_raw_scores(dataset, preds):
         a_pred = preds[qid]
         # Take max over all gold answers
         exact_scores[qid] = max(compute_exact(a, a_pred) for a in gold_answers)
-      
+
+        # New eval code
         if exact_scores[qid]==0:
-          if a_pred!='' and a_pred!=' ':
-            print (qa['question'], "gold: {}".format(gold_answers[0]), "pred: {}".format(a_pred))
           cnt += 1
-          if a_pred=='' or a_pred==' ' or gold_answers[0]=='':
-            blank+=1
+            # print("&&& ", qa['question'], "gold: {}".format(gold_answers[0]), "pred: {}".format(a_pred))
+
+          #Errors due to blanks
+          if a_pred=='' or a_pred==' ':
+            pred_blank += 1
+          if gold_answers[0] == '' or gold_answers[0] == ' ':
+            gold_blank += 1
+
+          #Errors that were close but not exact
+          if a_pred!='' and a_pred!=' ' and gold_answers[0]!='' and gold_answers[0]!=' ':
+            #Remove punctuation
+            a_pred_no_punc = a_pred.translate(str.maketrans('', '', string.punctuation))
+
+
+            if a_pred_no_punc in gold_answers[0]:
+              pred_is_substring += 1
+              print("&&& ", qa['question'], "gold: {}".format(gold_answers[0]), "pred: {}".format(a_pred))
+
+            if gold_answers[0] in a_pred_no_punc:
+              gold_is_substring += 1
+              # print("&&& ", qa['question'], "gold: {}".format(gold_answers[0]), "pred: {}".format(a_pred))
+
+
         f1_scores[qid] = max(compute_f1(a, a_pred) for a in gold_answers)
-  print (blank / cnt)
-  return exact_scores, f1_scores
+
+  err_stats = {}
+  err_stats["Wrong: some no answer"] = (pred_blank + gold_blank)/cnt
+  err_stats["Wrong: pred no answer"] = pred_blank/cnt
+  err_stats["Wrong: gold no answer"] = gold_blank/cnt
+  err_stats["Wrong: pred is substring"] = pred_is_substring/cnt
+  err_stats["Wrong: gold is substring"] = gold_is_substring/cnt
+
+  return exact_scores, f1_scores, err_stats
 
 def apply_no_ans_threshold(scores, na_probs, qid_to_has_ans, na_prob_thresh):
   new_scores = {}
@@ -252,7 +283,7 @@ def main():
   qid_to_has_ans = make_qid_to_has_ans(dataset)  # maps qid to True/False
   has_ans_qids = [k for k, v in qid_to_has_ans.items() if v]
   no_ans_qids = [k for k, v in qid_to_has_ans.items() if not v]
-  exact_raw, f1_raw = get_raw_scores(dataset, preds)
+  exact_raw, f1_raw, err_stats = get_raw_scores(dataset, preds)
   exact_thresh = apply_no_ans_threshold(exact_raw, na_probs, qid_to_has_ans,
                                         OPTS.na_prob_thresh)
   f1_thresh = apply_no_ans_threshold(f1_raw, na_probs, qid_to_has_ans,
@@ -267,7 +298,7 @@ def main():
   if OPTS.na_prob_file:
     find_all_best_thresh(out_eval, preds, exact_raw, f1_raw, na_probs, qid_to_has_ans)
   if OPTS.na_prob_file and OPTS.out_image_dir:
-    run_precision_recall_analysis(out_eval, exact_raw, f1_raw, na_probs, 
+    run_precision_recall_analysis(out_eval, exact_raw, f1_raw, na_probs,
                                   qid_to_has_ans, OPTS.out_image_dir)
     histogram_na_prob(na_probs, has_ans_qids, OPTS.out_image_dir, 'hasAns')
     histogram_na_prob(na_probs, no_ans_qids, OPTS.out_image_dir, 'noAns')
@@ -275,6 +306,7 @@ def main():
     with open(OPTS.out_file, 'w') as f:
       json.dump(out_eval, f)
   else:
+    print(str(err_stats).replace(', ', ',\n '))
     print(json.dumps(out_eval, indent=2))
 
 if __name__ == '__main__':
