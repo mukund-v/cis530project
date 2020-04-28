@@ -86,7 +86,9 @@ def get_raw_scores(dataset, preds):
   gold_blank = 0
   pred_is_substring = 0
   gold_is_substring = 0
-
+  question_types = ['who', 'what', 'where', 'when', 'why', 'how', 'which']
+  question_type = collections.Counter()
+  wrong_type = collections.Counter()
   for article in dataset:
     for p in article['paragraphs']:
       for qa in p['qas']:
@@ -99,12 +101,20 @@ def get_raw_scores(dataset, preds):
         if qid not in preds:
           print('Missing prediction for %s' % qid)
           continue
+
+        q_low = qa['question'].lower().replace("?","")
+        for q_type in question_types:
+          if q_type in q_low:
+            question_type[q_type]+=1
         a_pred = preds[qid]
         # Take max over all gold answers
         exact_scores[qid] = max(compute_exact(a, a_pred) for a in gold_answers)
 
         # New eval code
         if exact_scores[qid]==0:
+          for q_type in question_types:
+            if q_type in q_low:
+              wrong_type[q_type] += 1
           cnt += 1
             # print("&&& ", qa['question'], "gold: {}".format(gold_answers[0]), "pred: {}".format(a_pred))
 
@@ -137,6 +147,12 @@ def get_raw_scores(dataset, preds):
   err_stats["Wrong: gold no answer"] = gold_blank/cnt
   err_stats["Wrong: pred is substring"] = pred_is_substring/cnt
   err_stats["Wrong: gold is substring"] = gold_is_substring/cnt
+  for key in wrong_type:
+    wrong_type[key] /= cnt  # total number of wrongs, again some contain type types
+  for key in question_type:
+    question_type[key] /= 11873 # this is total number of qs. a couple contain two types
+  err_stats["Wrong by question type"] = wrong_type
+  err_stats["Questions by type"] = question_type
 
   return exact_scores, f1_scores, err_stats
 
